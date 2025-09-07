@@ -31,7 +31,9 @@ def main() -> None:
     )
 
     # Get multiple numeric choices at once
-    choices = get_multiple_numeric_input(f"Enter statuses (length {num_seasons}): ")
+    choices: List[str] = get_multiple_numeric_input(
+        f"Enter statuses (length {num_seasons}): "
+    )
 
     symbols: dict[str, str] = {
         "1": "✔️",  # Finished
