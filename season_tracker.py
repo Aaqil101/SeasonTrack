@@ -5,10 +5,11 @@ import sys
 import pyperclip
 
 # PyQt6 Modules
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import QEvent, Qt, QTimer
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
     QLayoutItem,
@@ -25,11 +26,16 @@ from helpers import Blur
 
 
 class SeasonTracker(QWidget):
+    PAGE_SIZE = 14
+    KEY_ESC = "\x1b"
+
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Season Tracker")
         self.setFixedSize(400, 400)
 
+        self.current_page = 0
+        self.total_pages = 1
         self.initUI()
 
     def initUI(self) -> None:
@@ -41,6 +47,7 @@ class SeasonTracker(QWidget):
         self.season_spin = QSpinBox()
         self.season_spin.setCursor(Qt.CursorShape.PointingHandCursor)
         self.season_spin.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
+        self.season_spin.installEventFilter(self)
         self.season_spin.setStyleSheet(
             """
             QSpinBox {
@@ -69,17 +76,110 @@ class SeasonTracker(QWidget):
             }
             """
         )
-        self.season_spin.setFixedWidth(30)
+        self.season_spin.setFixedWidth(40)
         self.season_spin.setRange(1, 100)
-        self.season_spin.setValue(1)
-        self.season_spin.valueChanged.connect(self.update_season_inputs)
+        self.season_spin.setValue(2)
+        self.season_spin.valueChanged.connect(self.on_season_spin_changed)
         season_layout.addWidget(self.season_spin)
         self.layout.addLayout(season_layout)
 
         # Season status selectors
-        self.status_layout = QVBoxLayout()
+        self.status_layout = QGridLayout()
         self.layout.addLayout(self.status_layout)
+        self.status_layout.setHorizontalSpacing(4)
+        self.status_layout.setVerticalSpacing(4)
+        self.status_layout.setContentsMargins(0, 0, 0, 0)
         self.status_selectors = []
+
+        # Paging controls
+        nav_layout = QHBoxLayout()
+        nav_layout.setContentsMargins(0, 0, 0, 0)
+        nav_layout.setSpacing(8)
+
+        self.prev_button = QPushButton("Previous")
+        self.prev_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.prev_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.prev_button.setStyleSheet(
+            """
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.04);
+                font-size: 14px;
+                font-weight: bold;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                padding: 4px;
+                border: none;
+                border-radius: 4px;
+                border: 2px solid transparent;
+            }
+
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.08);
+                color: rgba(187, 253, 190, 0.80);
+                border-bottom: 2px solid #0078d7;
+            }
+
+            QPushButton:pressed {
+                background-color: rgba(255, 255, 255, 0.40);
+                color: rgba(0, 255, 13, 0.80);
+                border-bottom: 2px solid #2aad6c;
+            }
+
+            QPushButton:focus {
+                background-color: #222;
+                border-bottom: 2px solid #0078d7;
+                border-right: 2px solid #0078d7;
+                font-style: unset;
+            }
+            """
+        )
+        self.prev_button.clicked.connect(self.prev_page)
+
+        self.next_button = QPushButton("Next")
+        self.next_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.next_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.next_button.setStyleSheet(
+            """
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.04);
+                font-size: 14px;
+                font-weight: bold;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                padding: 4px;
+                border: none;
+                border-radius: 4px;
+                border: 2px solid transparent;
+            }
+
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.08);
+                color: rgba(187, 253, 190, 0.80);
+                border-bottom: 2px solid #0078d7;
+            }
+
+            QPushButton:pressed {
+                background-color: rgba(255, 255, 255, 0.40);
+                color: rgba(0, 255, 13, 0.80);
+                border-bottom: 2px solid #2aad6c;
+            }
+
+            QPushButton:focus {
+                background-color: #222;
+                border-bottom: 2px solid #0078d7;
+                border-right: 2px solid #0078d7;
+                font-style: unset;
+            }
+            """
+        )
+        self.next_button.clicked.connect(self.next_page)
+
+        self.page_label = QLabel()
+        self.page_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        nav_layout.addWidget(self.prev_button)
+        nav_layout.addWidget(self.page_label)
+        nav_layout.addWidget(self.next_button)
+        self.layout.addLayout(nav_layout)
+
         self.update_season_inputs()
 
         # Generate button
@@ -160,74 +260,122 @@ class SeasonTracker(QWidget):
         self.apply_window_style()
         self.center_on_screen()
 
+    def on_season_spin_changed(self) -> None:
+        self.current_page = 0
+        self.update_season_inputs()
+
     def update_season_inputs(self) -> None:
-        # Clear old widgets
+        # Clear old widgets/layouts from the grid, but do NOT delete QComboBox widgets in all_status_selectors
         while self.status_layout.count():
             child: QLayoutItem | None = self.status_layout.takeAt(0)
             if child.widget():
-                child.widget().deleteLater()
+                # Only remove from layout, do not delete
+                child.widget().setParent(None)
             elif child.layout():
                 while child.layout().count():
                     sub_child: QLayoutItem | None = child.layout().takeAt(0)
                     if sub_child.widget():
-                        sub_child.widget().deleteLater()
-                child.layout().deleteLater()
+                        sub_child.widget().setParent(None)
+                # Remove the layout itself
+                child.layout().setParent(None)
 
-        self.status_selectors.clear()
         num_seasons: int = self.season_spin.value()
+        self.total_pages = (num_seasons - 1) // self.PAGE_SIZE + 1
+        self.page_label.setText(f"Page {self.current_page + 1} / {self.total_pages}")
+        self.prev_button.setEnabled(self.current_page > 0)
+        self.next_button.setEnabled(self.current_page < self.total_pages - 1)
 
-        # Add selectors for each season
-        for i in range(1, num_seasons + 1):
-            row = QHBoxLayout()
-            row.addWidget(QLabel(f"S{i:02}"))
-            combo = QComboBox()
-            combo.setFixedWidth(110)
-            combo.setCursor(Qt.CursorShape.PointingHandCursor)
-            combo.setStyleSheet(
-                """
-                QComboBox {
-                    background-color: rgba(255, 255, 255, 0.04);
-                    color: rgba(255, 255, 255, 0.9);
-                    font-size: 14px;
-                    font-weight: 700;
-                    font-style: normal;
-                    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-                    padding: 4px;
-                    border: none;
-                    border-radius: 4px;
-                    border: 2px solid transparent;
-                }
+        # Only create selectors once, keep their state
+        if (
+            not hasattr(self, "all_status_selectors")
+            or len(getattr(self, "all_status_selectors", [])) != num_seasons
+        ):
+            self.all_status_selectors = []
+            for i in range(1, num_seasons + 1):
+                combo = QComboBox()
+                combo.setMinimumWidth(120)
+                combo.setCursor(Qt.CursorShape.PointingHandCursor)
+                options: list[str] = ["▶️ To Watch", "⏸️ Watching", "🎯 Finished"]
+                combo.addItems(options)
+                combo.setCurrentText(options[0])  # "▶️ To Watch" set default
+                combo.setStyleSheet(
+                    """
+                    QComboBox {
+                        background-color: rgba(255, 255, 255, 0.04);
+                        color: rgba(255, 255, 255, 0.9);
+                        font-size: 14px;
+                        font-weight: 700;
+                        font-style: normal;
+                        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+                        padding: 2px;
+                        border: none;
+                        border-radius: 2px;
+                        border: 2px solid transparent;
+                    }
 
-                QComboBox:focus {
-                    background-color: #222;
-                    border-bottom: 2px solid #0078d7;
-                    border-right: 2px solid #0078d7;
-                    font-style: unset;
-                }
+                    QComboBox:focus {
+                        background-color: #222;
+                        border-bottom: 2px solid #0078d7;
+                        border-right: 2px solid #0078d7;
+                        font-style: unset;
+                    }
 
-                QComboBox:disabled {
-                    background-color: #444;
-                    color: #d3d3d3;
-                }
-                """
+                    QComboBox:disabled {
+                        background-color: #444;
+                        color: #d3d3d3;
+                    }
+                    """
+                )
+                self.all_status_selectors.append(combo)
+
+        self.status_selectors = []
+        start = self.current_page * self.PAGE_SIZE
+        end = min(start + self.PAGE_SIZE, num_seasons)
+        for idx, i in enumerate(range(start + 1, end + 1)):
+            row, col = divmod(idx, 2)  # 2 selectors per row
+            season_row = QHBoxLayout()
+            season_row.setContentsMargins(0, 0, 0, 0)
+            season_row.setSpacing(4)
+
+            label = QLabel(f"S{i:02}")
+            label.setAlignment(
+                Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight
             )
-            combo.addItems(["✔️ Finished", "❌ To Watch", "🚫 Watching"])
-            combo.setCurrentText("❌ To Watch")  # set default
-            row.addWidget(combo)
-            self.status_layout.addLayout(row)
+            label.setContentsMargins(0, 0, 0, 0)
+
+            arrow = QLabel("➜")
+            arrow.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            arrow.setContentsMargins(0, 0, 0, 0)
+
+            combo = self.all_status_selectors[i - 1]
+            season_row.addWidget(label)
+            season_row.addWidget(arrow)
+            season_row.addWidget(combo)
+
+            self.status_layout.addLayout(season_row, row, col)
             self.status_selectors.append(combo)
+
+    def prev_page(self) -> None:
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.update_season_inputs()
+
+    def next_page(self) -> None:
+        if self.current_page < self.total_pages - 1:
+            self.current_page += 1
+            self.update_season_inputs()
 
     def generate_tracker(self) -> None:
         symbols: dict[str, str] = {
-            "✔️ Finished": "✔️",
-            "❌ To Watch": "❌",
-            "🚫 Watching": "🚫",
+            "▶️ To Watch": "▶️",
+            "⏸️ Watching": "⏸️",
+            "🎯 Finished": "🎯",
         }
 
         output = []
-        for i, combo in enumerate(self.status_selectors, start=1):
+        for i, combo in enumerate(self.all_status_selectors, start=1):
             text = combo.currentText()
-            symbol: str = symbols.get(text, "❌")
+            symbol: str = symbols.get(text, "▶️")
             output.append(f"S{i:02}{symbol}")
 
         final_output: sys.LiteralString = " ".join(output)
@@ -245,6 +393,9 @@ class SeasonTracker(QWidget):
 
         # Set a timer to close it after 1 seconds
         QTimer.singleShot(1000, msg.close)
+
+        # Clear the output area after 1 second
+        QTimer.singleShot(1000, lambda: self.output_area.clear())
 
     def apply_window_style(self) -> None:
         """
@@ -282,6 +433,38 @@ class SeasonTracker(QWidget):
                 background-color: rgb(31, 39, 56);
             }
             """
+
+    def keyPressEvent(self, event) -> None:
+        # Neovim style: 'h' for prev, 'l' for next
+        text = event.text()
+        if text == "l":
+            if self.current_page < self.total_pages - 1:
+                self.next_page()
+        elif text == "h":
+            if self.current_page > 0:
+                self.prev_page()
+        elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+            self.generate_tracker()
+        elif text == self.KEY_ESC:
+            self.close()
+        else:
+            super().keyPressEvent(event)
+
+    def eventFilter(self, obj, event) -> bool:
+        if obj == self.season_spin and event.type() == QEvent.Type.KeyPress:
+            text = event.text()
+            if text == "l":
+                if self.current_page < self.total_pages - 1:
+                    self.next_page()
+                return True
+            elif text == "h":
+                if self.current_page > 0:
+                    self.prev_page()
+                return True
+            elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+                self.generate_tracker()
+                return True
+        return super().eventFilter(obj, event)
 
     def center_on_screen(self) -> None:
         """Centers the window on the current screen."""
