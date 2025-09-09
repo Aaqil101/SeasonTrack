@@ -10,3 +10,4 @@ PyQt6-Qt6==6.9.2
 PyQt6_sip==13.10.2
 pywin32-ctypes==0.2.3
 setuptools==80.9.0
+winmica==1.0.2
