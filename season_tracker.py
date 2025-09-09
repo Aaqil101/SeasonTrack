@@ -1,11 +1,13 @@
 # Build-In Modules
 import sys
+from pathlib import Path
 
-# External Modules
+# Copy to Clipboard
 import pyperclip
 
 # PyQt6 Modules
 from PyQt6.QtCore import QEvent, Qt, QTimer
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -21,8 +23,27 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+# WinMica for Windows 11 Mica Effect
+from winmica import ApplyMica, MicaType, is_mica_supported
+
 # Helpers Modules
-from helpers import Blur
+from helpers import Blur, Styles, center_on_screen
+
+
+# https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file#:~:text=def%20resource_path(relative_path)%3A%0A%20%20%20%20%22%22%22%20Get,return%20os.path.join(base_path%2C%20relative_path)
+def resource_path(relative_path: str) -> str:
+    """Get absolute path to resource, works for dev and for PyInstaller."""
+    try:
+        # PyInstaller >= 4 uses _MEIPASS, older versions used _MEIPASS2
+        base_path = getattr(sys, "_MEIPASS", getattr(sys, "_MEIPASS2", None))
+        if base_path:
+            base_path = Path(base_path)
+        else:
+            base_path: Path = Path.cwd()
+    except Exception:
+        base_path = Path.cwd()
+
+    return str(base_path / relative_path)
 
 
 class SeasonTracker(QWidget):
@@ -33,6 +54,25 @@ class SeasonTracker(QWidget):
         super().__init__()
         self.setWindowTitle("Season Tracker")
         self.setFixedSize(400, 400)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+        self.setStyleSheet(
+            """
+            QLabel {
+                font-size: 14px;
+                font-weight: 700;
+                font-style: normal;
+            }
+            """
+        )
+        if is_mica_supported():
+            hwnd = int(self.winId())
+            ApplyMica(hwnd, MicaType.MICA)
+
+        # Window Icon Path
+        IconPath: Path = Path(__file__).parent / "asset" / "AppIcon.ico"
+        # icon_path: str = resource_path(str(IconPath))
+        # self.setWindowIcon(QIcon(icon_path))
+        self.setWindowIcon(QIcon(str(IconPath)))
 
         self.current_page = 0
         self.total_pages = 1
@@ -44,41 +84,15 @@ class SeasonTracker(QWidget):
         # Season count selector
         season_layout = QHBoxLayout()
         season_layout.addWidget(QLabel("How many seasons?"))
+        # Season spin box
         self.season_spin = QSpinBox()
         self.season_spin.setCursor(Qt.CursorShape.PointingHandCursor)
         self.season_spin.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
         self.season_spin.installEventFilter(self)
-        self.season_spin.setStyleSheet(
-            """
-            QSpinBox {
-                background-color: rgba(255, 255, 255, 0.04);
-                color: rgba(255, 255, 255, 0.9);
-                font-size: 14px;
-                font-weight: 700;
-                font-style: normal;
-                font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-                padding: 2px;
-                border: none;
-                border-radius: 2px;
-                border: 2px solid transparent;
-            }
-
-            QSpinBox:focus {
-                background-color: #222;
-                border-bottom: 2px solid #0078d7;
-                border-right: 2px solid #0078d7;
-                font-style: unset;
-            }
-
-            QSpinBox:disabled {
-                background-color: #444;
-                color: #d3d3d3;
-            }
-            """
-        )
+        self.season_spin.setStyleSheet(Styles.SEASON_SPIN)
         self.season_spin.setFixedWidth(40)
         self.season_spin.setRange(1, 100)
-        self.season_spin.setValue(2)
+        self.season_spin.setValue(1)
         self.season_spin.valueChanged.connect(self.on_season_spin_changed)
         season_layout.addWidget(self.season_spin)
         self.layout.addLayout(season_layout)
@@ -99,77 +113,13 @@ class SeasonTracker(QWidget):
         self.prev_button = QPushButton("Previous")
         self.prev_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.prev_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.prev_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: rgba(255, 255, 255, 0.04);
-                font-size: 14px;
-                font-weight: bold;
-                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-                padding: 4px;
-                border: none;
-                border-radius: 4px;
-                border: 2px solid transparent;
-            }
-
-            QPushButton:hover {
-                background-color: rgba(255, 255, 255, 0.08);
-                color: rgba(187, 253, 190, 0.80);
-                border-bottom: 2px solid #0078d7;
-            }
-
-            QPushButton:pressed {
-                background-color: rgba(255, 255, 255, 0.40);
-                color: rgba(0, 255, 13, 0.80);
-                border-bottom: 2px solid #2aad6c;
-            }
-
-            QPushButton:focus {
-                background-color: #222;
-                border-bottom: 2px solid #0078d7;
-                border-right: 2px solid #0078d7;
-                font-style: unset;
-            }
-            """
-        )
+        self.prev_button.setStyleSheet(Styles.PREV_BUTTON)
         self.prev_button.clicked.connect(self.prev_page)
 
         self.next_button = QPushButton("Next")
         self.next_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.next_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.next_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: rgba(255, 255, 255, 0.04);
-                font-size: 14px;
-                font-weight: bold;
-                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-                padding: 4px;
-                border: none;
-                border-radius: 4px;
-                border: 2px solid transparent;
-            }
-
-            QPushButton:hover {
-                background-color: rgba(255, 255, 255, 0.08);
-                color: rgba(187, 253, 190, 0.80);
-                border-bottom: 2px solid #0078d7;
-            }
-
-            QPushButton:pressed {
-                background-color: rgba(255, 255, 255, 0.40);
-                color: rgba(0, 255, 13, 0.80);
-                border-bottom: 2px solid #2aad6c;
-            }
-
-            QPushButton:focus {
-                background-color: #222;
-                border-bottom: 2px solid #0078d7;
-                border-right: 2px solid #0078d7;
-                font-style: unset;
-            }
-            """
-        )
+        self.next_button.setStyleSheet(Styles.NEXT_BUTTON)
         self.next_button.clicked.connect(self.next_page)
 
         self.page_label = QLabel()
@@ -184,39 +134,7 @@ class SeasonTracker(QWidget):
 
         # Generate button
         self.generate_button = QPushButton("Generate Tracker")
-        self.generate_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: rgba(255, 255, 255, 0.04);
-                font-size: 14px;
-                font-weight: bold;
-                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-                padding: 4px;
-                border: none;
-                border-radius: 4px;
-                border: 2px solid transparent;
-            }
-
-            QPushButton:hover {
-                background-color: rgba(255, 255, 255, 0.08);
-                color: rgba(187, 253, 190, 0.80);
-                border-bottom: 2px solid #0078d7;
-            }
-
-            QPushButton:pressed {
-                background-color: rgba(255, 255, 255, 0.40);
-                color: rgba(0, 255, 13, 0.80);
-                border-bottom: 2px solid #2aad6c;
-            }
-
-            QPushButton:focus {
-                background-color: #222;
-                border-bottom: 2px solid #0078d7;
-                border-right: 2px solid #0078d7;
-                font-style: unset;
-            }
-            """
-        )
+        self.generate_button.setStyleSheet(Styles.GENERATE_BUTTON)
         self.generate_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.generate_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.generate_button.clicked.connect(self.generate_tracker)
@@ -226,39 +144,12 @@ class SeasonTracker(QWidget):
         self.output_area = QTextEdit()
         self.output_area.setReadOnly(True)
         self.output_area.setPlaceholderText("Your tracker will appear here...")
-        self.output_area.setStyleSheet(
-            """
-            QTextEdit {
-                background-color: rgba(255, 255, 255, 0.04);
-                color: rgba(255, 255, 255, 0.9);
-                font-size: 14px;
-                font-weight: 700;
-                font-style: normal;
-                font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-                padding: 4px;
-                border: none;
-                border-radius: 4px;
-                border: 2px solid transparent;
-            }
-
-            QTextEdit:focus {
-                background-color: #222;
-                border-bottom: 2px solid #0078d7;
-                border-right: 2px solid #0078d7;
-                font-style: unset;
-            }
-
-            QTextEdit:disabled {
-                background-color: #444;
-                color: #d3d3d3;
-            }
-            """
-        )
+        self.output_area.setStyleSheet(Styles.OUTPUT_AREA)
         self.output_area.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.layout.addWidget(self.output_area)
 
-        self.apply_window_style()
-        self.center_on_screen()
+        # self.apply_window_style()
+        center_on_screen(self)
 
     def on_season_spin_changed(self) -> None:
         self.current_page = 0
@@ -295,37 +186,10 @@ class SeasonTracker(QWidget):
                 combo = QComboBox()
                 combo.setMinimumWidth(120)
                 combo.setCursor(Qt.CursorShape.PointingHandCursor)
-                options: list[str] = ["▶️ To Watch", "⏸️ Watching", "🎯 Finished"]
+                options: list[str] = ["📕 To Watch", "📖 Watching", "📗 Finished"]
                 combo.addItems(options)
-                combo.setCurrentText(options[0])  # "▶️ To Watch" set default
-                combo.setStyleSheet(
-                    """
-                    QComboBox {
-                        background-color: rgba(255, 255, 255, 0.04);
-                        color: rgba(255, 255, 255, 0.9);
-                        font-size: 14px;
-                        font-weight: 700;
-                        font-style: normal;
-                        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-                        padding: 2px;
-                        border: none;
-                        border-radius: 2px;
-                        border: 2px solid transparent;
-                    }
-
-                    QComboBox:focus {
-                        background-color: #222;
-                        border-bottom: 2px solid #0078d7;
-                        border-right: 2px solid #0078d7;
-                        font-style: unset;
-                    }
-
-                    QComboBox:disabled {
-                        background-color: #444;
-                        color: #d3d3d3;
-                    }
-                    """
-                )
+                combo.setCurrentText(options[0])  # "📕 To Watch" set default
+                combo.setStyleSheet(Styles.COMBO)
                 self.all_status_selectors.append(combo)
 
         self.status_selectors = []
@@ -367,15 +231,15 @@ class SeasonTracker(QWidget):
 
     def generate_tracker(self) -> None:
         symbols: dict[str, str] = {
-            "▶️ To Watch": "▶️",
-            "⏸️ Watching": "⏸️",
-            "🎯 Finished": "🎯",
+            "📕 To Watch": "📕",
+            "📖 Watching": "📖",
+            "📗 Finished": "📗",
         }
 
         output = []
         for i, combo in enumerate(self.all_status_selectors, start=1):
             text = combo.currentText()
-            symbol: str = symbols.get(text, "▶️")
+            symbol: str = symbols.get(text, "❓")
             output.append(f"S{i:02}{symbol}")
 
         final_output: sys.LiteralString = " ".join(output)
@@ -406,33 +270,10 @@ class SeasonTracker(QWidget):
 
         if is_windows_11:
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-            self.setStyleSheet(
-                """
-                QLabel {
-                    font-size: 14px;
-                    font-weight: 700;
-                    font-style: normal;
-                }
-                QWidget#options_container {
-                    background-color: rgba(254, 255, 255, 0.02);
-                    border-radius: 5px;
-                    padding: -1px;
-                    border: 0px solid rgba(0, 0, 0, 0.2);
-                }
-                """
-            )
+            self.setStyleSheet(Styles.WIN11)
             Blur(self.winId())
         else:
-            """
-            QLabel {
-                font-size: 14px;
-                font-weight: 700;
-                font-style: normal;
-            }
-            QWidget {
-                background-color: rgb(31, 39, 56);
-            }
-            """
+            Styles.WIN10
 
     def keyPressEvent(self, event) -> None:
         # Neovim style: 'h' for prev, 'l' for next
@@ -465,24 +306,6 @@ class SeasonTracker(QWidget):
                 self.generate_tracker()
                 return True
         return super().eventFilter(obj, event)
-
-    def center_on_screen(self) -> None:
-        """Centers the window on the current screen."""
-        # Get the current screen where the window is
-        app_instance = QApplication.instance()
-        current_screen = (
-            app_instance.screenAt(self.pos()) or app_instance.primaryScreen()
-        )
-
-        # Get the geometry of the screen
-        screen_geometry = current_screen.availableGeometry()
-
-        # Calculate the center position
-        x = (screen_geometry.width() - self.width()) // 2 + screen_geometry.x()
-        y = (screen_geometry.height() - self.height()) // 2 + screen_geometry.y()
-
-        # Move the window
-        self.move(x, y)
 
 
 if __name__ == "__main__":
