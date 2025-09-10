@@ -1,10 +1,17 @@
 # SeasonTrack
 
-🎬 A simple Python command-line tool to track TV show seasons with status markers:
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL-orange.svg)](LICENSE)
+[![Core README](https://img.shields.io/badge/Core-README-blue)](https://github.com/Aaqil101/SeasonTrack/blob/master/README.md)
+[![Python](https://img.shields.io/badge/Python-3.13%2B-yellow)](https://www.python.org/)
+[![GitHub stars](https://img.shields.io/github/stars/Aaqil101/WiFi-Center.svg)](https://github.com/Aaqil101/SeasonTrack/stargazers)
+
+🎬 A simple [Python](https://www.python.org/) software to track TV show seasons with status markers:
 
 -   📕 To Watch
 -   📖 Watching
 -   📗 Finished
+
+> **Note:** If you want the command-line version of this software click here: [Season Tracker CLI](https://github.com/Aaqil101/SeasonTrack/tree/master/cli)
 
 ## Build Executable (with Icon)
 
