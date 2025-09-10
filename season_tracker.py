@@ -4,15 +4,15 @@ import random
 import sys
 from pathlib import Path
 
-# Copy to Clipboard
 import pyperclip
 
 # PyQt6 Modules
-from PyQt6.QtCore import QEvent, Qt, QTimer
+from PyQt6.QtCore import QEvent, QSettings, QSize, Qt, QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
+    QDialog,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -31,6 +31,8 @@ from winmica import ApplyMica, MicaType
 # Helpers Modules
 from helpers import Styles, center_on_screen
 
+# Copy to Clipboard
+
 
 # https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file#:~:text=def%20resource_path(relative_path)%3A%0A%20%20%20%20%22%22%22%20Get,return%20os.path.join(base_path%2C%20relative_path)
 def resource_path(relative_path) -> str:
@@ -44,8 +46,53 @@ def resource_path(relative_path) -> str:
     return os.path.join(base_path, relative_path)
 
 
+class SettingsDialog(QDialog):
+    def __init__(self, settings, parent=None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Settings")
+        self.settings = settings
+
+        layout = QVBoxLayout(self)
+
+        # Default season spin value
+        layout.addWidget(QLabel("Default number of seasons:"))
+        self.default_spin = QSpinBox()
+        self.default_spin.setRange(1, 100)
+        self.default_spin.setStyleSheet(Styles.SEASON_SPIN)
+        self.default_spin.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
+        saved_default = self.settings.value("default_season_count", 1, type=int)
+        self.default_spin.setValue(saved_default)
+        layout.addWidget(self.default_spin)
+
+        # Options for the combo box
+        layout.addWidget(QLabel("Season status:"))
+        self.season_status = QTextEdit()
+
+        layout.addWidget(self.season_status)
+
+        # Buttons
+        btn_layout = QHBoxLayout()
+
+        save_btn = QPushButton("Save")
+        save_btn.setStyleSheet(Styles.GENERATE_BUTTON)
+
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.setStyleSheet(Styles.SETTINGS_BUTTON)
+
+        btn_layout.addWidget(save_btn)
+        btn_layout.addWidget(cancel_btn)
+        layout.addLayout(btn_layout)
+
+        save_btn.clicked.connect(self.save_settings)
+        cancel_btn.clicked.connect(self.reject)
+
+    def save_settings(self) -> None:
+        self.settings.setValue("default_season_count", self.default_spin.value())
+        self.accept()
+
+
 class SeasonTracker(QWidget):
-    PAGE_SIZE = 14
+    PAGE_SIZE = 12
     KEY_ESC = "\x1b"
 
     def __init__(self) -> None:
@@ -53,11 +100,18 @@ class SeasonTracker(QWidget):
         self.setWindowTitle("Season Tracker")
         self.setFixedSize(400, 400)
 
+        # Path for .ini file inside AppData\Roaming\
+        appdata = os.getenv("APPDATA")  # usually C:\Users\<User>\AppData\Roaming
+        settings_dir = os.path.join(appdata, "SeasonTracker")
+        os.makedirs(settings_dir, exist_ok=True)
+
+        settings_path: str = os.path.join(settings_dir, "settings.ini")
+        self.settings = QSettings(settings_path, QSettings.Format.IniFormat)
+
         # Window Icon Path
         IconPath: Path = resource_path(
             Path(__file__).parent / "assets" / "WindowIcon.ico"
         )
-        # icon_path: str = resource_path(str(IconPath))
         self.setWindowIcon(QIcon(IconPath))
 
         self.current_page = 0
@@ -78,7 +132,10 @@ class SeasonTracker(QWidget):
         self.season_spin.setStyleSheet(Styles.SEASON_SPIN)
         self.season_spin.setFixedWidth(40)
         self.season_spin.setRange(1, 100)
-        self.season_spin.setValue(1)
+
+        default_seasons = self.settings.value("default_season_count", 1, type=int)
+        self.season_spin.setValue(default_seasons)
+
         self.season_spin.valueChanged.connect(self.on_season_spin_changed)
         season_layout.addWidget(self.season_spin)
         self.layout.addLayout(season_layout)
@@ -118,13 +175,26 @@ class SeasonTracker(QWidget):
 
         self.update_season_inputs()
 
-        # Generate button
+        # Settings & Generate buttons
+        controls_layout = QHBoxLayout()
+        controls_layout.setContentsMargins(0, 0, 0, 0)
+
         self.generate_button = QPushButton("Generate Tracker")
         self.generate_button.setStyleSheet(Styles.GENERATE_BUTTON)
         self.generate_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.generate_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.generate_button.clicked.connect(self.generate_tracker)
-        self.layout.addWidget(self.generate_button)
+
+        self.settings_button = QPushButton("🛠️")
+        self.settings_button.setFixedSize(32, 32)  # Keep it compact
+        self.settings_button.setStyleSheet(Styles.SETTINGS_BUTTON)
+        self.settings_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.generate_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.settings_button.clicked.connect(self.open_settings)
+
+        controls_layout.addWidget(self.generate_button)
+        controls_layout.addWidget(self.settings_button)
+        self.layout.addLayout(controls_layout)
 
         # Output area
         self.output_area = QTextEdit()
@@ -136,6 +206,13 @@ class SeasonTracker(QWidget):
 
         self.apply_window_style()
         center_on_screen(self)
+
+    def open_settings(self) -> None:
+        dialog = SettingsDialog(self.settings, self)
+        if dialog.exec():
+            # Reapply default spin value after user changes settings
+            default_value = self.settings.value("default_season_count", 1, type=int)
+            self.season_spin.setValue(default_value)
 
     def on_season_spin_changed(self) -> None:
         self.current_page = 0
@@ -157,7 +234,7 @@ class SeasonTracker(QWidget):
                 child.layout().setParent(None)
 
         num_seasons: int = self.season_spin.value()
-        self.total_pages = (num_seasons - 1) // self.PAGE_SIZE + 1
+        self.total_pages: int = (num_seasons - 1) // self.PAGE_SIZE + 1
         self.page_label.setText(f"Page {self.current_page + 1} / {self.total_pages}")
         self.prev_button.setEnabled(self.current_page > 0)
         self.next_button.setEnabled(self.current_page < self.total_pages - 1)
@@ -260,7 +337,7 @@ class SeasonTracker(QWidget):
             # Alternate between MICA and MICA_ALT each launch
             mica_type: MicaType = random.choice([MicaType.MICA, MicaType.MICA_ALT])
             ApplyMica(hwnd, mica_type)
-            # self.setStyleSheet(Styles.WIN11)
+            self.setStyleSheet(Styles.WIN11)
         else:
             self.setStyleSheet(Styles.WIN10)
 
@@ -277,6 +354,8 @@ class SeasonTracker(QWidget):
             self.generate_tracker()
         elif text == self.KEY_ESC:
             self.close()
+        elif event.key() == Qt.Key.Key_Home:
+            self.open_settings()
         else:
             super().keyPressEvent(event)
 
@@ -293,6 +372,9 @@ class SeasonTracker(QWidget):
                 return True
             elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
                 self.generate_tracker()
+                return True
+            elif event.key() == Qt.Key.Key_Home:
+                self.open_settings()
                 return True
         return super().eventFilter(obj, event)
 
