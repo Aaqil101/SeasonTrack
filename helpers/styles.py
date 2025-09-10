@@ -185,6 +185,7 @@ class Styles:
     """
     WIN10 = """
         QLabel {
+            color: #ffffff;
             font-size: 14px;
             font-weight: 700;
             font-style: normal;
