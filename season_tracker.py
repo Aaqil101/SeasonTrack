@@ -26,10 +26,10 @@ from PyQt6.QtWidgets import (
 )
 
 # WinMica for Windows 11 Mica Effect
-from winmica import ApplyMica, MicaType, is_mica_supported
+from winmica import ApplyMica, MicaType
 
 # Helpers Modules
-from helpers import Blur, Styles, center_on_screen
+from helpers import Styles, center_on_screen
 
 
 # https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file#:~:text=def%20resource_path(relative_path)%3A%0A%20%20%20%20%22%22%22%20Get,return%20os.path.join(base_path%2C%20relative_path)
@@ -52,21 +52,6 @@ class SeasonTracker(QWidget):
         super().__init__()
         self.setWindowTitle("Season Tracker")
         self.setFixedSize(400, 400)
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
-        self.setStyleSheet(
-            """
-            QLabel {
-                font-size: 14px;
-                font-weight: 700;
-                font-style: normal;
-            }
-            """
-        )
-        if is_mica_supported():
-            hwnd = int(self.winId())
-            # Alternate between MICA and MICA_ALT each launch
-            mica_type: MicaType = random.choice([MicaType.MICA, MicaType.MICA_ALT])
-            ApplyMica(hwnd, mica_type)
 
         # Window Icon Path
         IconPath: Path = resource_path(
@@ -149,7 +134,7 @@ class SeasonTracker(QWidget):
         self.output_area.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.layout.addWidget(self.output_area)
 
-        # self.apply_window_style()
+        self.apply_window_style()
         center_on_screen(self)
 
     def on_season_spin_changed(self) -> None:
@@ -271,10 +256,13 @@ class SeasonTracker(QWidget):
 
         if is_windows_11:
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-            self.setStyleSheet(Styles.WIN11)
-            Blur(self.winId())
+            hwnd = int(self.winId())
+            # Alternate between MICA and MICA_ALT each launch
+            mica_type: MicaType = random.choice([MicaType.MICA, MicaType.MICA_ALT])
+            ApplyMica(hwnd, mica_type)
+            # self.setStyleSheet(Styles.WIN11)
         else:
-            Styles.WIN10
+            self.setStyleSheet(Styles.WIN10)
 
     def keyPressEvent(self, event) -> None:
         # Neovim style: 'h' for prev, 'l' for next
