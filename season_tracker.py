@@ -1,4 +1,6 @@
 # Build-In Modules
+import os
+import random
 import sys
 from pathlib import Path
 
@@ -31,19 +33,15 @@ from helpers import Blur, Styles, center_on_screen
 
 
 # https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file#:~:text=def%20resource_path(relative_path)%3A%0A%20%20%20%20%22%22%22%20Get,return%20os.path.join(base_path%2C%20relative_path)
-def resource_path(relative_path: str) -> str:
-    """Get absolute path to resource, works for dev and for PyInstaller."""
+def resource_path(relative_path) -> str:
+    """Get absolute path to resource, works for dev and for PyInstaller"""
     try:
-        # PyInstaller >= 4 uses _MEIPASS, older versions used _MEIPASS2
-        base_path = getattr(sys, "_MEIPASS", getattr(sys, "_MEIPASS2", None))
-        if base_path:
-            base_path = Path(base_path)
-        else:
-            base_path: Path = Path.cwd()
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
     except Exception:
-        base_path = Path.cwd()
+        base_path: str = os.path.abspath(".")
 
-    return str(base_path / relative_path)
+    return os.path.join(base_path, relative_path)
 
 
 class SeasonTracker(QWidget):
@@ -66,13 +64,16 @@ class SeasonTracker(QWidget):
         )
         if is_mica_supported():
             hwnd = int(self.winId())
-            ApplyMica(hwnd, MicaType.MICA)
+            # Alternate between MICA and MICA_ALT each launch
+            mica_type: MicaType = random.choice([MicaType.MICA, MicaType.MICA_ALT])
+            ApplyMica(hwnd, mica_type)
 
         # Window Icon Path
-        IconPath: Path = Path(__file__).parent / "asset" / "AppIcon.ico"
+        IconPath: Path = resource_path(
+            Path(__file__).parent / "assets" / "WindowIcon.ico"
+        )
         # icon_path: str = resource_path(str(IconPath))
-        # self.setWindowIcon(QIcon(icon_path))
-        self.setWindowIcon(QIcon(str(IconPath)))
+        self.setWindowIcon(QIcon(IconPath))
 
         self.current_page = 0
         self.total_pages = 1
