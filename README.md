@@ -11,7 +11,12 @@
 To build the SeasonTrack executable with the app icon, use:
 
 ```ps1
-pyinstaller --clean -n SeasonTracker -F --windowed --icon=assets/AppIcon.ico --add-data "assets;assets" --add-data "helpers;helpers" season_tracker.py
+pyinstaller --clean -n SeasonTracker \
+    -F --windowed \
+    --icon=assets/AppIcon.ico \
+    --add-data "assets;assets" \
+    --add-data "helpers;helpers" \
+    season_tracker.py
 ```
 
 ## Icon Attribution
