@@ -118,6 +118,30 @@ class Styles:
             font-style: unset;
         }
     """
+    SETTINGS_BUTTON = """
+        QPushButton {
+            background-color: rgba(255, 255, 255, 0.04);
+            font-size: 14px;
+            font-weight: bold;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            padding: 4px;
+            border: none;
+            border-radius: 4px;
+            border: 2px solid transparent;
+        }
+
+        QPushButton:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: rgba(238, 229, 177, 0.9);
+            border-bottom: 2px solid #0078d7;
+        }
+
+        QPushButton:pressed {
+            background-color: rgba(255, 255, 255, 0.40);
+            color: rgba(238, 229, 177, 0.80);
+            border-bottom: 2px solid #2aad6c;
+        }
+    """
     OUTPUT_AREA = """
         QTextEdit {
             background-color: rgba(255, 255, 255, 0.04);
