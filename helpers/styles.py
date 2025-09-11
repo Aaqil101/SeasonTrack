@@ -142,6 +142,14 @@ class Styles:
             border-bottom: 2px solid #2aad6c;
         }
     """
+    GROUP_BOX = """
+        QGroupBox {
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            font-size: 12qpx;
+            font-weight: 700;
+            font-style: italic;
+        }
+    """
     OUTPUT_AREA = """
         QTextEdit {
             background-color: rgba(255, 255, 255, 0.04);
