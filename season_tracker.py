@@ -4,6 +4,7 @@ import random
 import sys
 from pathlib import Path
 
+# Copy to Clipboard
 import pyperclip
 
 # PyQt6 Modules
@@ -12,12 +13,10 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
-    QDialog,
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QLayoutItem,
-    QLineEdit,
     QMessageBox,
     QPushButton,
     QSpinBox,
@@ -31,8 +30,7 @@ from winmica import ApplyMica, MicaType
 
 # Helpers Modules
 from helpers import Styles, center_on_screen
-
-# Copy to Clipboard
+from settings import SettingsDialog
 
 
 # https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file#:~:text=def%20resource_path(relative_path)%3A%0A%20%20%20%20%22%22%22%20Get,return%20os.path.join(base_path%2C%20relative_path)
@@ -47,77 +45,7 @@ def resource_path(relative_path) -> str:
     return os.path.join(base_path, relative_path)
 
 
-class SettingsDialog(QDialog):
-    def __init__(self, settings, parent=None) -> None:
-        super().__init__(parent)
-        self.setWindowTitle("Settings")
-        self.settings = settings
-
-        layout = QVBoxLayout(self)
-
-        # --- Default season spin ---
-        layout.addWidget(QLabel("Default number of seasons:"))
-        self.default_spin = QSpinBox()
-        self.default_spin.setRange(1, 100)
-        self.default_spin.setStyleSheet(Styles.SEASON_SPIN)
-        self.default_spin.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
-        saved_default = self.settings.value("default_season_count", 1, type=int)
-        self.default_spin.setValue(saved_default)
-        layout.addWidget(self.default_spin)
-
-        # --- Status Options ---
-        layout.addWidget(QLabel("Status Options:"))
-        default_options: list[str] = [
-            "📕 To Watch",
-            "📖 Watching",
-            "📗 Finished",
-        ]
-        saved_options = self.settings.value(
-            "status_options", default_options, type=list
-        )
-
-        self.option_edits = []
-        labels: list[str] = ["First Option", "Second Option", "Third Option"]
-
-        for i in range(3):
-            row = QHBoxLayout()
-            row.addWidget(QLabel(labels[i]))
-            edit = QLineEdit()
-            edit.setText(saved_options[i] if i < len(saved_options) else "")
-            edit.setStyleSheet(Styles.LINE_EDIT)
-            row.addWidget(edit)
-            layout.addLayout(row)
-            self.option_edits.append(edit)
-
-        # Buttons
-        btn_layout = QHBoxLayout()
-
-        save_btn = QPushButton("Save")
-        save_btn.setStyleSheet(Styles.GENERATE_BUTTON)
-
-        cancel_btn = QPushButton("Cancel")
-        cancel_btn.setStyleSheet(Styles.SETTINGS_BUTTON)
-
-        btn_layout.addWidget(save_btn)
-        btn_layout.addWidget(cancel_btn)
-        layout.addLayout(btn_layout)
-
-        save_btn.clicked.connect(self.save_settings)
-        cancel_btn.clicked.connect(self.reject)
-
-    def save_settings(self) -> None:
-        self.settings.setValue("default_season_count", self.default_spin.value())
-
-        options = [
-            edit.text().strip() for edit in self.option_edits if edit.text().strip()
-        ]
-        self.settings.setValue("status_options", options)
-
-        self.accept()
-
-
 class SeasonTracker(QWidget):
-    PAGE_SIZE = 12
     KEY_ESC = "\x1b"
 
     def __init__(self) -> None:
@@ -134,11 +62,16 @@ class SeasonTracker(QWidget):
         self.settings = QSettings(settings_path, QSettings.Format.IniFormat)
 
         # Window Icon Path
-        IconPath: Path = resource_path(
+        default_icon: Path = resource_path(
             Path(__file__).parent / "assets" / "WindowIcon.ico"
         )
-        self.setWindowIcon(QIcon(IconPath))
+        if not self.settings.contains("window_icon"):
+            self.settings.setValue("window_icon", default_icon)
 
+        icon_path = self.settings.value("window_icon", default_icon)
+        self.setWindowIcon(QIcon(icon_path))
+
+        self.page_size = self.settings.value("page_size", 12, type=int)
         self.current_page = 0
         self.total_pages = 1
         self.initUI()
@@ -235,9 +168,17 @@ class SeasonTracker(QWidget):
     def open_settings(self) -> None:
         dialog = SettingsDialog(self.settings, self)
         if dialog.exec():
-            # Reapply default spin value after user changes settings
+            # Reload preferences
             default_value = self.settings.value("default_season_count", 1, type=int)
             self.season_spin.setValue(default_value)
+
+            self.page_size = self.settings.value("page_size", 12, type=int)
+            self.update_season_inputs()
+
+            # Apply new icon
+            icon_path = self.settings.value("window_icon", "")
+            if icon_path and Path(icon_path).exists():
+                self.setWindowIcon(QIcon(icon_path))
 
     def on_season_spin_changed(self) -> None:
         self.current_page = 0
@@ -259,7 +200,7 @@ class SeasonTracker(QWidget):
                 child.layout().setParent(None)
 
         num_seasons: int = self.season_spin.value()
-        self.total_pages: int = (num_seasons - 1) // self.PAGE_SIZE + 1
+        self.total_pages: int = (num_seasons - 1) // self.page_size + 1
         self.page_label.setText(f"Page {self.current_page + 1} / {self.total_pages}")
         self.prev_button.setEnabled(self.current_page > 0)
         self.next_button.setEnabled(self.current_page < self.total_pages - 1)
@@ -285,8 +226,8 @@ class SeasonTracker(QWidget):
                 self.all_status_selectors.append(combo)
 
         self.status_selectors = []
-        start = self.current_page * self.PAGE_SIZE
-        end = min(start + self.PAGE_SIZE, num_seasons)
+        start: int = self.current_page * self.page_size
+        end: int = min(start + self.page_size, num_seasons)
         for idx, i in enumerate(range(start + 1, end + 1)):
             row, col = divmod(idx, 2)  # 2 selectors per row
             season_row = QHBoxLayout()
