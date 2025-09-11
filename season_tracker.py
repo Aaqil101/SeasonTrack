@@ -7,7 +7,7 @@ from pathlib import Path
 import pyperclip
 
 # PyQt6 Modules
-from PyQt6.QtCore import QEvent, QSettings, QSize, Qt, QTimer
+from PyQt6.QtCore import QEvent, QSettings, Qt, QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QApplication,
@@ -17,6 +17,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLayoutItem,
+    QLineEdit,
     QMessageBox,
     QPushButton,
     QSpinBox,
@@ -54,7 +55,7 @@ class SettingsDialog(QDialog):
 
         layout = QVBoxLayout(self)
 
-        # Default season spin value
+        # --- Default season spin ---
         layout.addWidget(QLabel("Default number of seasons:"))
         self.default_spin = QSpinBox()
         self.default_spin.setRange(1, 100)
@@ -64,11 +65,29 @@ class SettingsDialog(QDialog):
         self.default_spin.setValue(saved_default)
         layout.addWidget(self.default_spin)
 
-        # Options for the combo box
-        layout.addWidget(QLabel("Season status:"))
-        self.season_status = QTextEdit()
+        # --- Status Options ---
+        layout.addWidget(QLabel("Status Options:"))
+        default_options: list[str] = [
+            "📕 To Watch",
+            "📖 Watching",
+            "📗 Finished",
+        ]
+        saved_options = self.settings.value(
+            "status_options", default_options, type=list
+        )
 
-        layout.addWidget(self.season_status)
+        self.option_edits = []
+        labels: list[str] = ["First Option", "Second Option", "Third Option"]
+
+        for i in range(3):
+            row = QHBoxLayout()
+            row.addWidget(QLabel(labels[i]))
+            edit = QLineEdit()
+            edit.setText(saved_options[i] if i < len(saved_options) else "")
+            edit.setStyleSheet(Styles.LINE_EDIT)
+            row.addWidget(edit)
+            layout.addLayout(row)
+            self.option_edits.append(edit)
 
         # Buttons
         btn_layout = QHBoxLayout()
@@ -88,6 +107,12 @@ class SettingsDialog(QDialog):
 
     def save_settings(self) -> None:
         self.settings.setValue("default_season_count", self.default_spin.value())
+
+        options = [
+            edit.text().strip() for edit in self.option_edits if edit.text().strip()
+        ]
+        self.settings.setValue("status_options", options)
+
         self.accept()
 
 
@@ -249,7 +274,11 @@ class SeasonTracker(QWidget):
                 combo = QComboBox()
                 combo.setMinimumWidth(120)
                 combo.setCursor(Qt.CursorShape.PointingHandCursor)
-                options: list[str] = ["📕 To Watch", "📖 Watching", "📗 Finished"]
+                options: list[str] = self.settings.value(
+                    "status_options",
+                    ["📕 To Watch", "📖 Watching", "📗 Finished"],
+                    type=list,
+                )
                 combo.addItems(options)
                 combo.setCurrentText(options[0])  # "📕 To Watch" set default
                 combo.setStyleSheet(Styles.COMBO)
