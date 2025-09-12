@@ -1,14 +1,10 @@
 # Build-In Modules
 import os
-import random
 import sys
 from pathlib import Path
 
-# Copy to Clipboard
-import pyperclip
-
 # PyQt6 Modules
-from PyQt6.QtCore import QEvent, QSettings, Qt, QTimer
+from PyQt6.QtCore import QEvent, QSettings, Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QApplication,
@@ -17,7 +13,6 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLayoutItem,
-    QMessageBox,
     QPushButton,
     QSpinBox,
     QTextEdit,
@@ -25,11 +20,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-# WinMica for Windows 11 Mica Effect
-from winmica import ApplyMica, MicaType
-
 # Helpers Modules
-from helpers import Styles, center_on_screen
+from helpers import Styles, apply_window_style, center_on_screen, generate_tracker
 from settings import SettingsDialog
 
 
@@ -46,8 +38,6 @@ def resource_path(relative_path) -> str:
 
 
 class SeasonTracker(QWidget):
-    KEY_ESC = "\x1b"
-
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Season Tracker")
@@ -62,14 +52,14 @@ class SeasonTracker(QWidget):
         self.settings = QSettings(settings_path, QSettings.Format.IniFormat)
 
         # Window Icon Path
-        default_icon: Path = resource_path(
-            Path(__file__).parent / "assets" / "WindowIcon.ico"
+        self.default_icon = str(
+            resource_path(Path(__file__).parent / "assets" / "WindowIcon.ico")
         )
         if not self.settings.contains("window_icon"):
-            self.settings.setValue("window_icon", default_icon)
+            self.settings.setValue("window_icon", self.default_icon)
 
-        icon_path = self.settings.value("window_icon", default_icon)
-        self.setWindowIcon(QIcon(icon_path))
+        # Apply window icon
+        self.apply_window_icon()
 
         self.page_size = self.settings.value("page_size", 12, type=int)
         self.current_page = 0
@@ -141,14 +131,12 @@ class SeasonTracker(QWidget):
         self.generate_button.setStyleSheet(Styles.GENERATE_BUTTON)
         self.generate_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.generate_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.generate_button.clicked.connect(self.generate_tracker)
 
         self.settings_button = QPushButton("🛠️")
         self.settings_button.setFixedSize(32, 32)  # Keep it compact
         self.settings_button.setStyleSheet(Styles.SETTINGS_BUTTON)
         self.settings_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.generate_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.settings_button.clicked.connect(self.open_settings)
 
         controls_layout.addWidget(self.generate_button)
         controls_layout.addWidget(self.settings_button)
@@ -162,23 +150,31 @@ class SeasonTracker(QWidget):
         self.output_area.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.layout.addWidget(self.output_area)
 
-        self.apply_window_style()
+        self.generate_button.clicked.connect(lambda: generate_tracker(self))
+        self.settings_button.clicked.connect(self.open_settings)
+
+        apply_window_style(self)
         center_on_screen(self)
 
     def open_settings(self) -> None:
         dialog = SettingsDialog(self.settings, self)
         if dialog.exec():
-            # Reload preferences
+            # Reload default season value
             default_value = self.settings.value("default_season_count", 1, type=int)
             self.season_spin.setValue(default_value)
 
+            # Reload page size
             self.page_size = self.settings.value("page_size", 12, type=int)
             self.update_season_inputs()
 
-            # Apply new icon
-            icon_path = self.settings.value("window_icon", "")
-            if icon_path and Path(icon_path).exists():
-                self.setWindowIcon(QIcon(icon_path))
+            # Reload window icon with fallback
+            self.apply_window_icon()
+
+    def apply_window_icon(self) -> None:
+        icon_path = str(self.settings.value("window_icon", self.default_icon))
+        if not Path(icon_path).exists():
+            icon_path: str = self.default_icon
+        self.setWindowIcon(QIcon(icon_path))
 
     def on_season_spin_changed(self) -> None:
         self.current_page = 0
@@ -262,56 +258,8 @@ class SeasonTracker(QWidget):
             self.current_page += 1
             self.update_season_inputs()
 
-    def generate_tracker(self) -> None:
-        symbols: dict[str, str] = {
-            "📕 To Watch": "📕",
-            "📖 Watching": "📖",
-            "📗 Finished": "📗",
-        }
-
-        output = []
-        for i, combo in enumerate(self.all_status_selectors, start=1):
-            text = combo.currentText()
-            symbol: str = symbols.get(text, "❓")
-            output.append(f"S{i:02}{symbol}")
-
-        final_output: sys.LiteralString = " ".join(output)
-        self.output_area.setPlainText(final_output)
-        pyperclip.copy(final_output)
-
-        # Create the message box
-        msg = QMessageBox(self)
-        msg.setIcon(QMessageBox.Icon.Information)
-        msg.setWindowTitle("Copied")
-        msg.setText("✅ Tracker copied to clipboard!")
-
-        # Show the message box
-        msg.show()
-
-        # Set a timer to close it after 1 seconds
-        QTimer.singleShot(1000, msg.close)
-
-        # Clear the output area after 1 second
-        QTimer.singleShot(1000, lambda: self.output_area.clear())
-
-    def apply_window_style(self) -> None:
-        """
-        Applies the appropriate window style based on the Windows version.
-        """
-        windows_build: int = sys.getwindowsversion().build
-        is_windows_11: bool = windows_build >= 22000
-
-        if is_windows_11:
-            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-            hwnd = int(self.winId())
-            # Alternate between MICA and MICA_ALT each launch
-            mica_type: MicaType = random.choice([MicaType.MICA, MicaType.MICA_ALT])
-            ApplyMica(hwnd, mica_type)
-            self.setStyleSheet(Styles.WIN11)
-        else:
-            self.setStyleSheet(Styles.WIN10)
-
     def keyPressEvent(self, event) -> None:
+        Key_Esc = "\x1b"
         # Neovim style: 'h' for prev, 'l' for next
         text = event.text()
         if text == "l":
@@ -321,8 +269,8 @@ class SeasonTracker(QWidget):
             if self.current_page > 0:
                 self.prev_page()
         elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
-            self.generate_tracker()
-        elif text == self.KEY_ESC:
+            generate_tracker(self)
+        elif text == Key_Esc:
             self.close()
         elif event.key() == Qt.Key.Key_Home:
             self.open_settings()
@@ -341,7 +289,7 @@ class SeasonTracker(QWidget):
                     self.prev_page()
                 return True
             elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
-                self.generate_tracker()
+                generate_tracker(self)
                 return True
             elif event.key() == Qt.Key.Key_Home:
                 self.open_settings()
