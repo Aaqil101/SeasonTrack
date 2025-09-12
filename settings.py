@@ -79,8 +79,8 @@ class SettingsDialog(QDialog):
         main_layout.addWidget(general_group)
 
         # --- Window Icon Section ---
-        default_icon: Path = resource_path(
-            Path(__file__).parent / "assets" / "WindowIcon.ico"
+        default_icon = str(
+            resource_path(Path(__file__).parent / "assets" / "WindowIcon.ico")
         )
 
         saved_icon = self.settings.value("window_icon", default_icon)
