@@ -26,18 +26,6 @@ from winmica import ApplyMica, MicaType
 from helpers import Styles, center_on_screen
 
 
-# https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file#:~:text=def%20resource_path(relative_path)%3A%0A%20%20%20%20%22%22%22%20Get,return%20os.path.join(base_path%2C%20relative_path)
-def resource_path(relative_path) -> str:
-    """Get absolute path to resource, works for dev and for PyInstaller"""
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path: str = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
-
-
 class SettingsDialog(QDialog):
     def __init__(self, settings, parent=None) -> None:
         super().__init__(parent)
@@ -79,9 +67,7 @@ class SettingsDialog(QDialog):
         main_layout.addWidget(general_group)
 
         # --- Window Icon Section ---
-        default_icon = str(
-            resource_path(Path(__file__).parent / "assets" / "WindowIcon.ico")
-        )
+        default_icon = str(Path(__file__).parent / "assets" / "WindowIcon.ico")
 
         saved_icon = self.settings.value("window_icon", default_icon)
         self.icon_edit = QLineEdit()

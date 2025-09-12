@@ -25,36 +25,22 @@ from helpers import Styles, apply_window_style, center_on_screen, generate_track
 from settings import SettingsDialog
 
 
-# https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file#:~:text=def%20resource_path(relative_path)%3A%0A%20%20%20%20%22%22%22%20Get,return%20os.path.join(base_path%2C%20relative_path)
-def resource_path(relative_path) -> str:
-    """Get absolute path to resource, works for dev and for PyInstaller"""
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path: str = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
-
-
-class SeasonTracker(QWidget):
+class SeasonTrack(QWidget):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("Season Tracker")
+        self.setWindowTitle("Season Track")
         self.setFixedSize(400, 400)
 
         # Path for .ini file inside AppData\Roaming\
         appdata = os.getenv("APPDATA")  # usually C:\Users\<User>\AppData\Roaming
-        settings_dir = os.path.join(appdata, "SeasonTracker")
+        settings_dir = os.path.join(appdata, "SeasonTrack")
         os.makedirs(settings_dir, exist_ok=True)
 
         settings_path: str = os.path.join(settings_dir, "settings.ini")
         self.settings = QSettings(settings_path, QSettings.Format.IniFormat)
 
         # Window Icon Path
-        self.default_icon = str(
-            resource_path(Path(__file__).parent / "assets" / "WindowIcon.ico")
-        )
+        self.default_icon = str(Path(__file__).parent / "assets" / "WindowIcon.ico")
         if not self.settings.contains("window_icon"):
             self.settings.setValue("window_icon", self.default_icon)
 
@@ -299,6 +285,6 @@ class SeasonTracker(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = SeasonTracker()
+    window = SeasonTrack()
     window.show()
     sys.exit(app.exec())
