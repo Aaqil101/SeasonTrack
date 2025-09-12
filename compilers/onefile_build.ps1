@@ -18,7 +18,7 @@ $pyinstallerCmd = @(
     "--icon=assets/AppIcon.ico",
     "--add-data `"assets;assets`"",
     "--add-data `"helpers;helpers`"",
-    "season_track.py"
+    "main.py"
 ) -join " "
 
 # Run pyinstaller
