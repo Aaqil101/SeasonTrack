@@ -25,99 +25,6 @@ class Styles:
             color: #d3d3d3;
         }
     """
-    PREV_BUTTON = """
-        QPushButton {
-            background-color: rgba(255, 255, 255, 0.04);
-            font-size: 14px;
-            font-weight: bold;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            padding: 4px;
-            border: none;
-            border-radius: 4px;
-            border: 2px solid transparent;
-        }
-
-        QPushButton:hover {
-            background-color: rgba(255, 255, 255, 0.08);
-            color: rgba(187, 253, 190, 0.80);
-            border-bottom: 2px solid #0078d7;
-        }
-
-        QPushButton:pressed {
-            background-color: rgba(255, 255, 255, 0.40);
-            color: rgba(0, 255, 13, 0.80);
-            border-bottom: 2px solid #2aad6c;
-        }
-
-        QPushButton:focus {
-            background-color: #222;
-            border-bottom: 2px solid #0078d7;
-            border-right: 2px solid #0078d7;
-            font-style: unset;
-        }
-    """
-    NEXT_BUTTON = """
-        QPushButton {
-            background-color: rgba(255, 255, 255, 0.04);
-            font-size: 14px;
-            font-weight: bold;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            padding: 4px;
-            border: none;
-            border-radius: 4px;
-            border: 2px solid transparent;
-        }
-
-        QPushButton:hover {
-            background-color: rgba(255, 255, 255, 0.08);
-            color: rgba(187, 253, 190, 0.80);
-            border-bottom: 2px solid #0078d7;
-        }
-
-        QPushButton:pressed {
-            background-color: rgba(255, 255, 255, 0.40);
-            color: rgba(0, 255, 13, 0.80);
-            border-bottom: 2px solid #2aad6c;
-        }
-
-        QPushButton:focus {
-            background-color: #222;
-            border-bottom: 2px solid #0078d7;
-            border-right: 2px solid #0078d7;
-            font-style: unset;
-        }
-    """
-    GENERATE_BUTTON = """
-        QPushButton {
-            background-color: rgba(255, 255, 255, 0.04);
-            font-size: 14px;
-            font-weight: bold;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            padding: 4px;
-            border: none;
-            border-radius: 4px;
-            border: 2px solid transparent;
-        }
-
-        QPushButton:hover {
-            background-color: rgba(255, 255, 255, 0.08);
-            color: rgba(187, 253, 190, 0.80);
-            border-bottom: 2px solid #0078d7;
-        }
-
-        QPushButton:pressed {
-            background-color: rgba(255, 255, 255, 0.40);
-            color: rgba(0, 255, 13, 0.80);
-            border-bottom: 2px solid #2aad6c;
-        }
-
-        QPushButton:focus {
-            background-color: #222;
-            border-bottom: 2px solid #0078d7;
-            border-right: 2px solid #0078d7;
-            font-style: unset;
-        }
-    """
     SETTINGS_BUTTON = """
         QPushButton {
             background-color: rgba(255, 255, 255, 0.04);
@@ -140,6 +47,78 @@ class Styles:
             background-color: rgba(255, 255, 255, 0.40);
             color: rgba(238, 229, 177, 0.80);
             border-bottom: 2px solid #2aad6c;
+        }
+    """
+    SAVE_BUTTON = """
+        QPushButton {
+            background-color: rgba(255, 255, 255, 0.04);
+            font-size: 14px;
+            font-weight: bold;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            padding: 4px;
+            border: none;
+            border-radius: 4px;
+            border: 2px solid transparent;
+        }
+
+        QPushButton:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: rgba(114, 255, 122, 0.90);
+            border-bottom: 2px solid #12d700;
+        }
+
+        QPushButton:pressed {
+            background-color: rgba(255, 255, 255, 0.40);
+            color: rgba(0, 255, 13, 0.90);
+            border-bottom: 2px solid #2aad6c;
+        }
+    """
+    CANCEL_BUTTON = """
+        QPushButton {
+            background-color: rgba(255, 255, 255, 0.04);
+            font-size: 14px;
+            font-weight: bold;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            padding: 4px;
+            border: none;
+            border-radius: 4px;
+            border: 2px solid transparent;
+        }
+
+        QPushButton:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 109, 109, 0.90);
+            border-bottom: 2px solid #d70000;
+        }
+
+        QPushButton:pressed {
+            background-color: rgba(255, 255, 255, 0.40);
+            color: rgba(255, 0, 0, 0.90);
+            border-bottom: 2px solid #ad2a2a;
+        }
+    """
+    HELP_BUTTON = """
+        QPushButton {
+            background-color: rgba(255, 255, 255, 0.04);
+            font-size: 14px;
+            font-weight: bold;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            padding: 4px;
+            border: none;
+            border-radius: 4px;
+            border: 2px solid transparent;
+        }
+
+        QPushButton:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: rgba(104, 164, 255, 0.90);
+            border-bottom: 2px solid #0078d7;
+        }
+
+        QPushButton:pressed {
+            background-color: rgba(255, 255, 255, 0.40);
+            color: rgba(0, 102, 255, 0.90);
+            border-bottom: 2px solid #0032d7;
         }
     """
     GROUP_BOX = """
