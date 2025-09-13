@@ -22,8 +22,17 @@ def apply_window_style(self) -> None:
     if is_windows_11:
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         hwnd = int(self.winId())
-        # Alternate between MICA and MICA_ALT each launch
-        mica_type: MicaType = random.choice([MicaType.MICA, MicaType.MICA_ALT])
+
+        mica_mode = self.settings.value("mica_mode", "🎲 Random")
+
+        if mica_mode.startswith("🌌"):
+            mica_type = MicaType.MICA
+        elif mica_mode.startswith("🌓"):
+            mica_type = MicaType.MICA_ALT
+        else:  # "🎲 Random"
+            # Alternate between MICA and MICA_ALT each launch
+            mica_type: MicaType = random.choice([MicaType.MICA, MicaType.MICA_ALT])
+
         ApplyMica(hwnd, mica_type)
         self.setStyleSheet(Styles.WIN11)
     else:
