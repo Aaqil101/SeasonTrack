@@ -58,6 +58,11 @@ python main.py
 -   **Seasons Per Page** — Controls how many selectors show per page.
 -   **Status Options** — Customize labels and emojis for tracking (e.g. 🎯, ⏳, ✅).
 -   **Window Icon** — Choose a custom `.ico` or `.png` file.
+-   **Choose Mica Mode** — Set window background style:
+    -   🎲 **Random** (default) — Pick randomly on startup.
+    -   🌌 **Mica** — Use the standard Mica effect.
+    -   🌓 **Mica Alt** — Use the alternative Mica effect.
+-   **Keyboard Shortcuts** — Quickly navigate with Alt keys or custom hotkeys (see Help ❓).
 
 All settings are stored in:
 
@@ -101,7 +106,7 @@ To build the SeasonTrack [one directory](https://pyinstaller.org/en/stable/usage
 .\compilers\onedir_build.ps1
 ```
 
-> **Note:** You need to be in the SeasonTrack directory for this to work, **DO NOT** go into the compilers directory.
+> **Note:** You must be in the SeasonTrack directory for this to work; **please do not** enter the compilers directory.
 
 ## Icon Attribution
 
