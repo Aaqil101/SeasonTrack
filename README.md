@@ -23,11 +23,11 @@ Easily mark seasons as **📕 To Watch**, **📖 Watching**, or **📗 Finished*
     -   Custom window icon
 -   🪟 **Windows 10/11 Styling** — Mica effect on Windows 11, dark themed styles on Windows 10.
 -   ⌨️ **Keyboard Shortcuts**
-    -   `h` → Previous page
-    -   `l` → Next page
-    -   `Enter` → Generate tracker
-    -   `Esc` → Exit
-    -   `Home` → Open settings
+    | Window | Keyboard Shortcuts / Actions |
+    |-----------------|----------------------------------------------------------------------------------------------------------------------------------|
+    | Main Window | Esc → Close window<br>Alt+P → Previous page<br>Alt+N → Next page<br>Enter or Alt+G → Generate Tracker<br>F1 or Alt+H → Open Help<br>F2 or Alt+S → Open Settings |
+    | Settings Window | Esc or Alt+C → Close window<br>Alt+S → Save Settings<br>Alt+B → Browse Icon |
+    | Help Window | Alt+R → Open ReadMe<br>Esc or Alt+C → Close window |
 -   📋 **Clipboard Integration** — One-click generate copies tracker output to clipboard.
 -   ✅ **Quick Feedback** — Temporary toast-like popup confirms when tracker is copied.
 
@@ -36,8 +36,8 @@ Easily mark seasons as **📕 To Watch**, **📖 Watching**, or **📗 Finished*
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/season-tracker.git
-cd season-tracker
+git clone https://github.com/Aaqil101/SeasonTrack.git
+cd SeasonTrack
 ```
 
 ### 2. Install dependencies
@@ -49,7 +49,7 @@ pip install -r requirements.txt
 ### 3. Run the app
 
 ```bash
-python season_tracker.py
+python main.py
 ```
 
 ## ⚙️ Settings Overview
@@ -62,7 +62,7 @@ python season_tracker.py
 All settings are stored in:
 
 ```
-%APPDATA%\SeasonTracker\settings.ini
+%APPDATA%\SeasonTrack\settings.ini
 ```
 
 ## 🖼️ Example Output
@@ -87,18 +87,21 @@ S01📗 S02📖 S03📕 S04📖 S05📗
 
 (Add screenshots of **main window**, **settings dialog**, and **output message box** here)
 
-## Build Executable (with Icon)
+## Build Executable
 
-To build the SeasonTrack executable with the app icon, use:
+To build the SeasonTrack [one file](https://pyinstaller.org/en/stable/usage.html#cmdoption-F) executable, use:
 
 ```ps1
-pyinstaller --clean -n SeasonTracker `
-    -F --windowed `
-    --icon=assets/AppIcon.ico `
-    --add-data "assets;assets" `
-    --add-data "helpers;helpers" `
-    season_tracker.py
+.\compilers\onefile_build.ps1
 ```
+
+To build the SeasonTrack [one directory](https://pyinstaller.org/en/stable/usage.html#cmdoption-D) executable, use:
+
+```ps1
+.\compilers\onedir_build.ps1
+```
+
+> **Note:** You need to be in the SeasonTrack directory for this to work, **DO NOT** go into the compilers directory.
 
 ## Icon Attribution
 
