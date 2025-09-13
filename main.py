@@ -21,7 +21,13 @@ from PyQt6.QtWidgets import (
 )
 
 # Helpers Modules
-from helpers import Styles, apply_window_style, center_on_screen, generate_tracker
+from helpers import (
+    HelpDialog,
+    Styles,
+    apply_window_style,
+    center_on_screen,
+    generate_tracker,
+)
 from settings import SettingsDialog
 
 
@@ -38,6 +44,10 @@ class SeasonTrack(QWidget):
 
         settings_path: str = os.path.join(settings_dir, "settings.ini")
         self.settings = QSettings(settings_path, QSettings.Format.IniFormat)
+
+        # Mica Mode: "🌌 Mica", "🌓 Mica Alt", or "🎲 Random"
+        if not self.settings.contains("mica_mode"):
+            self.settings.setValue("mica_mode", "🎲 Random")  # Default mica mode
 
         # Window Icon Path
         self.default_icon = str(Path(__file__).parent / "assets" / "WindowIcon.ico")
@@ -87,16 +97,16 @@ class SeasonTrack(QWidget):
         nav_layout.setContentsMargins(0, 0, 0, 0)
         nav_layout.setSpacing(8)
 
-        self.prev_button = QPushButton("Previous")
+        self.prev_button = QPushButton("&Previous")
         self.prev_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.prev_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.prev_button.setStyleSheet(Styles.PREV_BUTTON)
+        self.prev_button.setStyleSheet(Styles.HELP_BUTTON)
         self.prev_button.clicked.connect(self.prev_page)
 
-        self.next_button = QPushButton("Next")
+        self.next_button = QPushButton("&Next")
         self.next_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.next_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.next_button.setStyleSheet(Styles.NEXT_BUTTON)
+        self.next_button.setStyleSheet(Styles.HELP_BUTTON)
         self.next_button.clicked.connect(self.next_page)
 
         self.page_label = QLabel()
@@ -113,19 +123,30 @@ class SeasonTrack(QWidget):
         controls_layout = QHBoxLayout()
         controls_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.generate_button = QPushButton("Generate Tracker")
-        self.generate_button.setStyleSheet(Styles.GENERATE_BUTTON)
+        self.generate_button = QPushButton("&Generate Tracker")
+        self.generate_button.setStyleSheet(Styles.SAVE_BUTTON)
         self.generate_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.generate_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         self.settings_button = QPushButton("🛠️")
+        self.settings_button.setToolTip("Open Settings")
+        self.settings_button.setShortcut("Alt+S")
         self.settings_button.setFixedSize(32, 32)  # Keep it compact
         self.settings_button.setStyleSheet(Styles.SETTINGS_BUTTON)
         self.settings_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.generate_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
+        self.help_button = QPushButton("❓")
+        self.help_button.setToolTip("Help & Shortcuts")
+        self.help_button.setShortcut("Alt+H")
+        self.help_button.setFixedSize(32, 32)  # Keep it compact
+        self.help_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.help_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.help_button.setStyleSheet(Styles.HELP_BUTTON)
+
         controls_layout.addWidget(self.generate_button)
         controls_layout.addWidget(self.settings_button)
+        controls_layout.addWidget(self.help_button)
         self.layout.addLayout(controls_layout)
 
         # Output area
@@ -138,6 +159,7 @@ class SeasonTrack(QWidget):
 
         self.generate_button.clicked.connect(lambda: generate_tracker(self))
         self.settings_button.clicked.connect(self.open_settings)
+        self.help_button.clicked.connect(self.open_help)
 
         apply_window_style(self)
         center_on_screen(self)
@@ -155,6 +177,10 @@ class SeasonTrack(QWidget):
 
             # Reload window icon with fallback
             self.apply_window_icon()
+
+    def open_help(self) -> None:
+        dialog = HelpDialog(self.settings, self)
+        dialog.exec()
 
     def apply_window_icon(self) -> None:
         icon_path = str(self.settings.value("window_icon", self.default_icon))
@@ -258,8 +284,10 @@ class SeasonTrack(QWidget):
             generate_tracker(self)
         elif text == Key_Esc:
             self.close()
-        elif event.key() == Qt.Key.Key_Home:
+        elif event.key() == Qt.Key.Key_F2:
             self.open_settings()
+        elif event.key() == Qt.Key.Key_F1:
+            self.open_help()
         else:
             super().keyPressEvent(event)
 
@@ -277,8 +305,11 @@ class SeasonTrack(QWidget):
             elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
                 generate_tracker(self)
                 return True
-            elif event.key() == Qt.Key.Key_Home:
+            elif event.key() == Qt.Key.Key_F2:
                 self.open_settings()
+                return True
+            elif event.key() == Qt.Key.Key_F1:
+                self.open_help()
                 return True
         return super().eventFilter(obj, event)
 
