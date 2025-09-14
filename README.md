@@ -8,7 +8,7 @@
 A lightweight **[PyQt6](https://doc.qt.io/qtforpython-6/) desktop app** for tracking TV show seasons with a clean interface, customizable statuses, and clipboard integration.
 Easily mark seasons as **📕 To Watch**, **📖 Watching**, or **📗 Finished** — and generate a compact progress string in one click.
 
-![App Screenshot](https://github.com/Aaqil101/SeasonTrack/blob/master/screenshots/main_window.png)
+![App Screenshot](https://github.com/Aaqil101/SeasonTrack/blob/master/screenshots/main_window.png|600)
 
 > **Note:** If you want the command-line version of this software click here: [Season Tracker CLI](https://github.com/Aaqil101/SeasonTrack/tree/master/cli)
 
