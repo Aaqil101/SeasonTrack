@@ -93,28 +93,30 @@ S01📗 S02📖 S03📕 S04📖 S05📗
 <table>
   <tr>
     <td align="center" style="padding:10px;">
-      <div style="border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.3); padding:8px; background:#1e1e1e; color:white; width:160px;">
-        <img src="https://github.com/Aaqil101/SeasonTrack/blob/master/screenshots/main_window.png" width="150" style="border-radius:12px;"/><br/>
-        <b>Card 1</b><br/>
+      <div style="border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.3); padding:8px; background:#1e1e1e; color:white; width:410px;">
+        <img src="https://github.com/Aaqil101/SeasonTrack/blob/master/screenshots/main_window.png" width="600" style="border-radius:8px;"/><br/>
+        <b>Main Window</b><br/>
         <!-- <a href="https://example.com" style="color:#61dafb; text-decoration:none;">🔗 Link</a> -->
       </div>
     </td>
     <td align="center" style="padding:10px;">
-      <div style="border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.3); padding:8px; background:#1e1e1e; color:white; width:160px;">
-        <img src="https://github.com/Aaqil101/SeasonTrack/blob/master/screenshots/settings_window.png" width="150" style="border-radius:12px;"/><br/>
-        <b>Card 2</b><br/>
+      <div style="border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.3); padding:8px; background:#1e1e1e; color:white; width:410px;">
+        <img src="https://github.com/Aaqil101/SeasonTrack/blob/master/screenshots/settings_window.png" width="600" style="border-radius:8px;"/><br/>
+        <b>Settings Window</b><br/>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" style="padding:10px;">
+      <div style="border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.3); padding:8px; background:#1e1e1e; color:white; width:410px;">
+        <img src="https://github.com/Aaqil101/SeasonTrack/blob/master/screenshots/output_window.png" width="600" style="border-radius:8px;"/><br/>
+        <b>Output Window</b><br/>
       </div>
     </td>
     <td align="center" style="padding:10px;">
-      <div style="border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.3); padding:8px; background:#1e1e1e; color:white; width:160px;">
-        <img src="https://github.com/Aaqil101/SeasonTrack/blob/master/screenshots/output_window.png" width="150" style="border-radius:12px;"/><br/>
-        <b>Card 3</b><br/>
-      </div>
-    </td>
-    <td align="center" style="padding:10px;">
-      <div style="border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.3); padding:8px; background:#1e1e1e; color:white; width:160px;">
-        <img src="https://github.com/Aaqil101/SeasonTrack/blob/master/screenshots/help_window.png" width="150" style="border-radius:12px;"/><br/>
-        <b>Card 4</b><br/>
+      <div style="border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.3); padding:8px; background:#1e1e1e; color:white; width:410px;">
+        <img src="https://github.com/Aaqil101/SeasonTrack/blob/master/screenshots/help_window.png" width="600" style="border-radius:8px;"/><br/>
+        <b>Help Window</b><br/>
       </div>
     </td>
   </tr>
