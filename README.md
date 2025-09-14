@@ -6,11 +6,31 @@
 [![GitHub stars](https://img.shields.io/github/stars/Aaqil101/WiFi-Center.svg)](https://github.com/Aaqil101/SeasonTrack/stargazers)
 
 A lightweight **[PyQt6](https://doc.qt.io/qtforpython-6/) desktop app** for tracking TV show seasons with a clean interface, customizable statuses, and clipboard integration.
-Easily mark seasons as **📕 To Watch**, **📖 Watching**, or **📗 Finished** — and generate a compact progress string in one click.
+Easily mark seasons as **📕 To Watch**, **📖 Watching**, or **📗 Finished**, and generate a compact progress string in one click.
 
 <img src="https://github.com/Aaqil101/SeasonTrack/blob/master/screenshots/main_window.png" width="600" style="border-radius:8px;"/>
 
-> **Note:** If you want the command-line version of this software click here: [Season Tracker CLI](https://github.com/Aaqil101/SeasonTrack/tree/master/cli)
+> **Note:** If you want the command-line version of this software, click here: [Season Tracker CLI](https://github.com/Aaqil101/SeasonTrack/tree/master/cli)
+
+---
+
+<details>
+  <summary><h2>Use Cases</h2></summary>
+
+I use **[Listy](https://play.google.com/store/apps/details?id=pro.listy)** to privately keep track of all my favorite things using lists. With [Listy](https://play.google.com/store/apps/details?id=pro.listy), I can save restaurants, movies, books, video games, TV shows, and more in one organized place. In the Pro version, it’s possible to add detailed notes for movies, books, video games, TV shows, and other items.
+
+To streamline my TV show tracking, I use the **[SeasonTrack](https://github.com/Aaqil101/SeasonTrack/releases/tag/3.0)** app. It allows me to mark seasons with clear status indicators:
+
+- 📕 **To Watch** – for upcoming seasons 
+- 📖 **Watching** – for currently active seasons  
+- 📗 **Finished** – for completed seasons
+
+With just one click, SeasonTrack generates a **compact progress string** summarizing my watch status, which is automatically copied to my PC clipboard. Using the **[Phone Link](https://play.google.com/store/apps/details?id=com.microsoft.appmanager&hl=en)** app, I can access my PC clipboard on my phone, making it effortless to paste the progress string into [Listy](https://play.google.com/store/apps/details?id=pro.listy).
+
+This workflow allows me to efficiently track my shows across devices while keeping my favorite media organized, updated, and easily accessible.
+
+</details>
+
 
 ## ✨ Features
 
@@ -28,7 +48,7 @@ Easily mark seasons as **📕 To Watch**, **📖 Watching**, or **📗 Finished*
     | Main Window | Esc → Close window<br>Alt+P → Previous page<br>Alt+N → Next page<br>Enter or Alt+G → Generate Tracker<br>F1 or Alt+H → Open Help<br>F2 or Alt+S → Open Settings |
     | Settings Window | Esc or Alt+C → Close window<br>Alt+S → Save Settings<br>Alt+B → Browse Icon |
     | Help Window | Alt+R → Open ReadMe<br>Esc or Alt+C → Close window |
--   📋 **Clipboard Integration** — One-click generate copies tracker output to clipboard.
+-   📋 **Clipboard Integration** — One-click generates copies of the tracker output to the clipboard.
 -   ✅ **Quick Feedback** — Temporary toast-like popup confirms when tracker is copied.
 
 ## 🚀 Getting Started
