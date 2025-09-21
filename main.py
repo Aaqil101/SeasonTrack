@@ -9,10 +9,12 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
+    QDialog,
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QLayoutItem,
+    QLineEdit,
     QPushButton,
     QSpinBox,
     QTextEdit,
@@ -91,6 +93,7 @@ class SeasonTrack(QWidget):
         self.status_layout.setVerticalSpacing(4)
         self.status_layout.setContentsMargins(0, 0, 0, 0)
         self.status_selectors = []
+        self.episode_inputs = []
 
         # Paging controls
         nav_layout = QHBoxLayout()
@@ -256,6 +259,64 @@ class SeasonTrack(QWidget):
             season_row.addWidget(label)
             season_row.addWidget(arrow)
             season_row.addWidget(combo)
+
+            # Remove episode_input QLineEdit, use dialog only
+            def on_status_changed(idx, cmb=combo) -> None:
+                is_watching = cmb.itemText(idx) == options[1]
+                if is_watching:
+                    current_episode = cmb.property("current_episode")
+                    if not current_episode:
+                        dlg = QDialog(self)
+                        dlg.setWindowTitle("Currently Watching Episode")
+
+                        input_layout = QHBoxLayout()
+                        label = QLabel("<b>Enter current episode:</b>")
+                        label.setTextFormat(Qt.TextFormat.RichText)
+
+                        input_box = QSpinBox()
+                        input_box.setCursor(Qt.CursorShape.PointingHandCursor)
+                        input_box.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
+                        input_box.setStyleSheet(Styles.SEASON_SPIN)
+                        input_box.setFixedWidth(45)
+                        input_box.setRange(1, 100)
+
+                        input_layout.addWidget(label)
+                        input_layout.addWidget(input_box)
+
+                        # Buttons
+                        button_layout = QHBoxLayout()
+
+                        save_button = QPushButton("&Save")
+                        save_button.setCursor(Qt.CursorShape.PointingHandCursor)
+                        save_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+                        save_button.setStyleSheet(Styles.SAVE_BUTTON)
+
+                        cancel_button = QPushButton("&Cancel")
+                        cancel_button.setCursor(Qt.CursorShape.PointingHandCursor)
+                        cancel_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+                        cancel_button.setStyleSheet(Styles.CANCEL_BUTTON)
+
+                        button_layout.addWidget(save_button)
+                        button_layout.addWidget(cancel_button)
+
+                        layout = QVBoxLayout()
+                        layout.addLayout(input_layout)
+                        layout.addLayout(button_layout)
+
+                        save_button.clicked.connect(dlg.accept)
+                        cancel_button.clicked.connect(dlg.reject)
+                        dlg.setLayout(layout)
+
+                        if dlg.exec() == QDialog.DialogCode.Accepted:
+                            text: str = input_box.text()
+                            if text:
+                                cmb.setProperty("current_episode", text)
+                        else:
+                            cmb.setCurrentIndex(0)  # Reset to "To Watch"
+                else:
+                    cmb.setProperty("current_episode", None)
+
+            combo.currentIndexChanged.connect(on_status_changed)
 
             self.status_layout.addLayout(season_row, row, col)
             self.status_selectors.append(combo)
