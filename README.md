@@ -21,16 +21,15 @@ I use **[Listy](https://play.google.com/store/apps/details?id=pro.listy)** to pr
 
 To streamline my TV show tracking, I use the **[SeasonTrack](https://github.com/Aaqil101/SeasonTrack/releases/tag/3.0)** app. It allows me to mark seasons with clear status indicators:
 
-- 📕 **To Watch** – for upcoming seasons 
-- 📖 **Watching** – for currently active seasons  
-- 📗 **Finished** – for completed seasons
+-   📕 **To Watch** – for upcoming seasons
+-   📖 **Watching** – for currently active seasons
+-   📗 **Finished** – for completed seasons
 
 With just one click, SeasonTrack generates a **compact progress string** summarizing my watch status, which is automatically copied to my PC clipboard. Using the **[Phone Link](https://play.google.com/store/apps/details?id=com.microsoft.appmanager&hl=en)** app, I can access my PC clipboard on my phone, making it effortless to paste the progress string into [Listy](https://play.google.com/store/apps/details?id=pro.listy).
 
 This workflow allows me to efficiently track my shows across devices while keeping my favorite media organized, updated, and easily accessible.
 
 </details>
-
 
 ## ✨ Features
 
@@ -45,9 +44,10 @@ This workflow allows me to efficiently track my shows across devices while keepi
 -   ⌨️ **Keyboard Shortcuts**
     | Window | Keyboard Shortcuts / Actions |
     |-----------------|----------------------------------------------------------------------------------------------------------------------------------|
-    | Main Window | Esc → Close window<br>Alt+P → Previous page<br>Alt+N → Next page<br>Enter or Alt+G → Generate Tracker<br>F1 or Alt+H → Open Help<br>F2 or Alt+S → Open Settings |
-    | Settings Window | Esc or Alt+C → Close window<br>Alt+S → Save Settings<br>Alt+B → Browse Icon |
-    | Help Window | Alt+R → Open ReadMe<br>Esc or Alt+C → Close window |
+    | Main Window | Esc → Close window<br>Alt+p → Previous page<br>Alt+n → Next page<br>Enter or Alt+g → Generate Tracker<br>F1 or Alt+h → Open Help<br>F2 or Alt+s → Open Settings |
+    | Settings Window | Esc or Alt+c → Close window<br>Alt+s → Save Settings<br>Alt+b → Browse Icon |
+    | Help Window | Alt+r → Open ReadMe<br>Esc or Alt+c → Close window |
+    | Current Episode Window | Alt+s → Save Episode<br>Esc or Alt+c → Close window |
 -   📋 **Clipboard Integration** — One-click generates copies of the tracker output to the clipboard.
 -   ✅ **Quick Feedback** — Temporary toast-like popup confirms when tracker is copied.
 
