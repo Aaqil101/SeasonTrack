@@ -29,26 +29,33 @@ class HelpDialog(QDialog):
                 <td style="background-color: #1e1e1e; padding: 4px;">Main Window</td>
                 <td style="background-color: #252525; padding: 4px;">
                     Esc → Close window<br>
-                    Alt+P → Previous page<br>
-                    Alt+N → Next page<br>
-                    Enter or Alt+G → Generate Tracker<br>
-                    F1 or Alt+H → Open Help<br>
-                    F2 or Alt+S → Open Settings
+                    Alt+p → Previous page<br>
+                    Alt+n → Next page<br>
+                    Enter or Alt+g → Generate Tracker<br>
+                    F1 or Alt+h → Open Help<br>
+                    F2 or Alt+s → Open Settings
                 </td>
             </tr>
             <tr>
                 <td style="background-color: #1e1e1e; padding: 4px;">Settings Window</td>
                 <td style="background-color: #252525; padding: 4px;">
                     Esc or Alt+C → Close window<br>
-                    Alt+S → Save Settings<br>
-                    Alt+B → Browse Icon
+                    Alt+s → Save Settings<br>
+                    Alt+b → Browse Icon
                 </td>
             </tr>
             <tr>
                 <td style="background-color: #1e1e1e; padding: 4px;">Help Window</td>
                 <td style="background-color: #252525; padding: 4px;">
-                    Alt+R → Open ReadMe<br>
-                    Esc or Alt+C → Close window
+                    Alt+r → Open ReadMe<br>
+                    Esc or Alt+c → Close window
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color: #1e1e1e; padding: 4px;">Current Episode Window</td>
+                <td style="background-color: #252525; padding: 4px;">
+                    Alt+s → Save Episode<br>
+                    Esc or Alt+c → Close window
                 </td>
             </tr>
             </table>
