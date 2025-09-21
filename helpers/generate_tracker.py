@@ -10,17 +10,30 @@ from PyQt6.QtWidgets import QMessageBox
 
 
 def generate_tracker(self) -> None:
-    symbols: dict[str, str] = {
-        "📕 To Watch": "📕",
-        "📖 Watching": "📖",
-        "📗 Finished": "📗",
-    }
+    # Get status options from settings (e.g., ["📕 To Watch", "📖 Watching", "📗 Finished"])
+    options: list[str] = self.settings.value(
+        "status_options",
+        ["📕 To Watch", "📖 Watching", "📗 Finished"],
+        type=list,
+    )
+    # Extract emojis from each option (first character)
+    emojis = [opt.strip()[0] if opt.strip() else "❓" for opt in options]
 
     output = []
     for i, combo in enumerate(self.all_status_selectors, start=1):
         text = combo.currentText()
-        symbol: str = symbols.get(text, "❓")
-        output.append(f"S{i:02}{symbol}")
+        # Find the emoji for the selected status option
+        symbol = "❓"
+        for idx, opt in enumerate(options):
+            if text == opt:
+                symbol = emojis[idx]
+                break
+        # Add episode number if status is '📖 Watching' and property is set
+        episode = combo.property("current_episode")
+        if text == options[1] and episode:
+            output.append(f"S{i:02}{symbol}E{int(episode):02}")
+        else:
+            output.append(f"S{i:02}{symbol}")
 
     final_output: sys.LiteralString = " ".join(output)
     self.output_area.setPlainText(final_output)
